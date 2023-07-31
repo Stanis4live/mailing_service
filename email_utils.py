@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Content, To
-from access import EMAIL, TOKEN
+from flask import url_for
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from access import EMAIL, PASSWORD
 from celery_config import celery_app
 from jinja2 import Environment
 
@@ -11,28 +13,32 @@ from jinja2 import Environment
 def send_email(template_name, template_vars, to_emails):
     with open('templates/layouts/{}.html'.format(template_name), 'rb') as file:
         template = file.read().decode('utf-8')
+
+    # Создаем URL-адрес изображения для отслеживания и добавляем его в содержимое электронной почты
+    # генерируем URL для маршрута track_open,
+    # _external=True говорит url_for сгенерировать абсолютный URL, включая схему (http или https) и имя хоста
+    # добавляем в HTML-шаблон письма тег изображения
+    tracking_image_url = url_for('track_open', email_id=template_vars['email_id'], _external=True)
+    template += '<img src="{}">'.format(tracking_image_url)
+
     # заменяем переменные в шаблоне на их значения, переданные в функцию render_template_string из Flask
     content = Environment().from_string(template).render(**template_vars)
 
-    # создаёте объект Content, который содержит HTML-код (content) и должен быть интерпретирован как HTML ("text/html")
-    content_obj = Content("text/html", content)
+    # Объект сообщения
+    message = MIMEMultipart("alternative")
+    message["Subject"] = template_vars.get('subject', 'No subject')
+    message["From"] = EMAIL
+    message["To"] = ', '.join(to_emails)
+    message.attach(MIMEText(content, "html"))
 
-    # объект Mail - электронное письмо
-    message = Mail(
-        from_email=EMAIL,
-        to_emails=To(to_emails),
-    # пытаемся получить значение ключа 'subject' в словаре template_vars. Если ключ отсутствует, возвращается строка 'No subject'.
-        subject=template_vars.get('subject', 'No subject'),
-        html_content=content_obj)
+
+    # Отправляем письмо
     try:
-    # создаем клиента SendGrid API, используя наш SendGrid API ключ.
-        sg = SendGridAPIClient(TOKEN)
-    # отправляем письмо, используя метод send клиента SendGrid API. Результат отправки сохраняется в переменной response.
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.login(EMAIL, PASSWORD)
+        server.sendmail(EMAIL, to_emails, message.as_string())
+        server.close()
     except Exception as e:
-        print(e.message)
+        print(str(e))
 
 

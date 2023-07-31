@@ -28,6 +28,10 @@
                         <option value="birthday">Birthday</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="delay">Delay (seconds)</label>
+                    <input type="number" class="form-control" id="delay" name="delay" min="0">
+                </div>
                 <!-- Поле для ввода содержания письма -->
                 <div class="form-group">
                     <label for="content">Content</label>
@@ -46,6 +50,7 @@
         var modal = $('#myModal');
         var btn = $("#openModal");
         var span = $(".close");
+
 
         // Назначаем обработчик событий на кнопку открытия модального окна, который показывает модальное окно при нажатии
         btn.click(function() {
@@ -76,6 +81,7 @@
             var subject = $("#subject").val();
             var content = $("#content").val();
             var template = $("#template").val();
+            var delay = $("#delay").val();
 
             // Определение url для AJAX в зависимости от выбранного шаблона
             var url;
@@ -93,7 +99,8 @@
                 data: JSON.stringify({
                     subject: subject,
                     content: content,
-                    template: template
+                    template: template,
+                    delay: delay
                 }),
                 // В случае успешного ответа от сервера, показываем уведомление об успехе и закрываем модальное окно
                 success: function() {

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+Sent Emails
+{% endblock %}
+
+{% block content %}
+<h1>Sent Emails</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Email</th>
+      <th scope="col">Subject</th>
+      <th scope="col">Time Sent</th>
+      <th scope="col">Opened</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sent_email in sent_emails %}
+    <tr>
+      <td>{{ sent_email.email }}</td>
+      <td>{{ sent_email.subject }}</td>
+      <td>{{ sent_email.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>{{ 'Yes' if sent_email.opened else 'No' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
