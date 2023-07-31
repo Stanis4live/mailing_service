@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from flask import render_template_string
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Content, To
 from access import EMAIL, TOKEN
 from celery_config import celery_app
+from jinja2 import Environment
 
 
 # название шаблона, значения переменных в виде словаря и to_emails (список адресов получателей)
@@ -12,7 +12,7 @@ def send_email(template_name, template_vars, to_emails):
     with open('templates/layouts/{}.html'.format(template_name), 'rb') as file:
         template = file.read().decode('utf-8')
     # заменяем переменные в шаблоне на их значения, переданные в функцию render_template_string из Flask
-    content = render_template_string(template, **template_vars)
+    content = Environment().from_string(template).render(**template_vars)
 
     # создаёте объект Content, который содержит HTML-код (content) и должен быть интерпретирован как HTML ("text/html")
     content_obj = Content("text/html", content)
