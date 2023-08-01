@@ -18,6 +18,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+# класс: подписчик
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -29,6 +30,7 @@ class Subscriber(db.Model):
         return '<Subscriber %r>' % self.email
 
 
+# класс: отправленное письмо
 class SentEmail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False)
@@ -43,11 +45,13 @@ def fetch_all_subscribers_from_database():
     return subscribers
 
 
+# страница с формой для создания рассылки
 @app.route("/", methods=["GET"])
 def index():
     return render_template("create_mailing.html")
 
 
+# функция создания рассылок
 @app.route("/create-mailing/<mailing_type>", methods=["POST"])
 def create_mailing(mailing_type):
     if request.method == "POST":
@@ -99,8 +103,8 @@ def create_mailing(mailing_type):
         return render_template("create-mailing.html")
 
 
-
-@app.route('/track-open/<int:email_id>')  # Метод отслеживания открытия письма
+# Метод отслеживания открытия письма
+@app.route('/track-open/<int:email_id>')
 def track_open(email_id):
     sent_email = SentEmail.query.get(email_id)
     if sent_email is None:
@@ -110,6 +114,7 @@ def track_open(email_id):
     return redirect("https://i.imgur.com/T7kd04l.png", code=302)
 
 
+# функция создания подписчика
 @app.route('/database', methods=['GET', 'POST'])
 def database():
     if request.method == 'POST':
@@ -123,16 +128,16 @@ def database():
             db.session.commit()
             redirect(url_for('index'))
         except Exception as exs:
-            # все незавершенные изменения откатываются
             db.session.rollback()
             return exs
 
-        return redirect(url_for('index')) # Перенаправление на главную страницу после успешного добавления подписчика
+        return redirect(url_for('index'))
 
     else:
         return render_template('database.html')
 
 
+# функция удаления подписчика
 @app.route('/delete-subscriber', methods=['POST'])
 def delete_subscriber():
     email = request.form['delete_email']
@@ -149,6 +154,7 @@ def delete_subscriber():
         return str(ex), 500
 
 
+# отображает отправленные письма из базы данных
 @app.route('/sent-emails')
 def sent_emails():
     sent_emails = SentEmail.query.order_by(SentEmail.timestamp.desc()).all()
@@ -157,10 +163,4 @@ def sent_emails():
 
 
 if __name__ == '__main__':
-    app.run(debug=True) # TODO debug убрать
-# TODO - добавить файл с контактами
-# TODO - серый фон когда модальное окно второе всплывает
-# TODO - обработка ошибок, если не заполнены поля
-# TODO тесты
-# TODO - RabbitMQ в документацию
-# TODO - добавить requariments.txt
+    app.run(debug=True)

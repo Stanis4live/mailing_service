@@ -1,25 +1,19 @@
+<!--шаблон страницы с созданием рассылок-->
 {% extends "base.html" %}
 
 {% block content %}
         <h1>Create Mailing</h1>
 
-          <!-- Кнопка для открытия модального окна -->
     <button id="openModal" class="btn btn-primary">Create Mailing</button>
 
-    <!-- Модальное окно -->
     <div id="myModal" class="modal">
-        <!-- Содержимое модального окна -->
         <div class="modal-content">
-            <!-- Кнопка для закрытия модального окна -->
             <span class="close">&times;</span>
-            <!-- Форма для создания рассылки -->
             <form id="create-mailing-form">
-                <!-- Поле для ввода темы письма -->
                 <div class="form-group">
                     <label for="subject">Subject</label>
                     <input type="text" class="form-control" id="subject" name="subject">
                 </div>
-                <!-- Поле для выбора шаблона -->
                 <div class="form-group">
                     <label for="template">Template</label>
                     <select class="form-control" id="template" name="template">
@@ -32,58 +26,45 @@
                     <label for="delay">Delay (seconds)</label>
                     <input type="number" class="form-control" id="delay" name="delay" min="0">
                 </div>
-                <!-- Поле для ввода содержания письма -->
                 <div class="form-group">
                     <label for="content">Content</label>
                     <textarea class="form-control" id="content" name="content"></textarea>
                 </div>
-                <!-- Кнопка для отправки формы -->
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
     </div>
 
     <script>
-    <!-- Гарантируем, что весь код будет выполнен только после полной загрузки страницы-->
     $(document).ready(function() {
-        // Создаем переменные, которые содержат ссылки на наши элементы страницы
         var modal = $('#myModal');
         var btn = $("#openModal");
         var span = $(".close");
 
 
-        // Назначаем обработчик событий на кнопку открытия модального окна, который показывает модальное окно при нажатии
         btn.click(function() {
             modal.show();
         });
 
-        // Назначаем обработчик событий на кнопку закрытия модального окна, который скрывает модальное окно при нажатии
         span.click(function() {
             modal.hide();
         });
 
-        // Обработчик событий, который скрывает модальное окно, когда пользователь кликает в любом месте за его пределами
         $(window).click(function(event) {
             if (event.target == modal) {
                 modal.hide();
             }
         });
 
-        // Выбор элемента HTML с id "create-mailing-form"
-        // привязывает функцию, которую мы передаем в качестве аргумента, к событию "submit"
-        // "e" - объект события, содержит информацию о нём
         $("#create-mailing-form").submit(function(e) {
 
-            // Предотвращаем стандартное поведение отправки формы (которое обычно перезагружает страницу)
             e.preventDefault();
 
-            // объявляются новые переменные, которым присваиваются значения (val), полученные у элементов HTML с соответствующими id
             var subject = $("#subject").val();
             var content = $("#content").val();
             var template = $("#template").val();
             var delay = $("#delay").val();
 
-            // Определение url для AJAX в зависимости от выбранного шаблона
             var url;
             if (template === "birthday") {
                 url = "/create-mailing/birthday";
@@ -91,7 +72,6 @@
                 url = "/create-mailing/general";
             }
 
-            // Отправляем данные формы на сервер с помощью AJAX
             $.ajax({
                 type: "POST",
                 url: url,
@@ -102,12 +82,11 @@
                     template: template,
                     delay: delay
                 }),
-                // В случае успешного ответа от сервера, показываем уведомление об успехе и закрываем модальное окно
+
                 success: function() {
                     alert("Mailing created successfully!");
                     modal.hide();
                 },
-                // В случае ошибки от сервера, показываем уведомление об ошибке
                 error: function() {
                     alert("Failed to create mailing.");
                 }

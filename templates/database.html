@@ -1,3 +1,4 @@
+<!--шаблон взаимодействия с базой данных-->
 {% extends "base.html" %}
 
 {% block title %}
@@ -44,7 +45,6 @@ Add Subscriber
         $(document).ready(function() {
             $("#database-form").submit(function(e) {
                 e.preventDefault();
-<!--  получение значений, введенных в поля ввода с идентификаторами "#email" и т.д.-->
                 var email = $("#email").val();
                 var first_name = $("#first_name").val();
                 var last_name = $("#last_name").val();
